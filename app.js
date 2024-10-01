@@ -11,23 +11,10 @@ const compression = require("compression");
 const path = require("path");
 const AppError = require("./utils/appError");
 //const globalErrorHandler = require("./controllers/errorController");
-const doctorRouter = require("./routes/doctorRoutes");
 const userRouter = require("./routes/userRoutes");
 const adminRouter = require("./routes/adminRoutes");
 
 // const favoriteRouter = require("./routes/favoriteRoutes.js");
-const reviewDoctorsRouter = require("./routes/reviewDoctorsRoutes");
-const reviewUsersRouter = require("./routes/reviewUsersRoutes");
-const reviewHospitalRouter = require("./routes/reviewHospitalRoutes");
-const appointmentRouter = require("./routes/appointmentsRoutes.js");
-const orderRouter = require("./routes/orderRoutes.js");
-const hospitalRouter = require("./routes/hospitalRoutes.js");
-const prescriptionRouter = require("./routes/prescriptionRoutes.js");
-const contactRoutes = require("./routes/contactRoutes");
-const googleAuthRoutes = require("./routes/googleAuthRoutes.js");
-const chatRouter = require("./routes/chatRoutes");
-const serviceRouter = require("./routes/serviceRoutes.js");
-const webhookRouter = require("./routes/webhookRoutes.js");
 // const viewRouter = require("./routes/viewRoutes");
 
 //
