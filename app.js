@@ -12,8 +12,9 @@ const path = require("path");
 const AppError = require("./utils/appError");
 //const globalErrorHandler = require("./controllers/errorController");
 const userRouter = require("./routes/userRoutes");
+const instructorRouter = require("./routes/instructorRoutes");
 const adminRouter = require("./routes/adminRoutes");
-
+const courseRouter = require("./routes/courseRoute");
 // const favoriteRouter = require("./routes/favoriteRoutes.js");
 // const viewRouter = require("./routes/viewRoutes");
 
@@ -105,23 +106,14 @@ app.use((req, res, next) => {
 app.head("/check", (req, res) => {
   res.status(200).send();
 });
-app.use("/api/v1/doctors", doctorRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins", adminRouter);
-app.use("/api/v1/hospitals", hospitalRouter);
-app.use("/api/v1/reviewsDoctors", reviewDoctorsRouter);
-app.use("/api/v1/reviewsUsers", reviewUsersRouter);
-app.use("/api/v1/reviews", reviewHospitalRouter);
-app.use("/api/v1/appointments", appointmentRouter);
-// app.use("/api/v1/favorites", favoriteRouter);
-app.use("/api/v1/orders", orderRouter);
-app.use("/api/v1/prescription", prescriptionRouter);
-app.use("/api/v1/contact", contactRoutes);
-app.use("/api/v1/chats", chatRouter);
-app.use("/api/v1/service", serviceRouter);
-app.use("/api/v1", webhookRouter);
+app.use("/api/v1/instructors", instructorRouter);
+app.use("/api/v1/course", courseRouter);
 
-app.use("/", googleAuthRoutes);
+// app.use("/api/v1", webhookRouter);
+
+// app.use("/", googleAuthRoutes);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

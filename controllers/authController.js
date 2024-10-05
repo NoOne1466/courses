@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("./../models/userModel");
-const Doctor = require("./../models/doctorModel");
+const Instructor = require("./../models/instructorModel");
 const Admin = require("./../models/adminModel");
 const generatePassword = require("./../utils/passwordGenerator");
 const catchAsync = require("./../utils/catchAsync");
@@ -12,7 +12,7 @@ const sendEmail = require("./../utils/email");
 
 const getUser = async (id, req) => {
   let user;
-  // get the user/doctor and send the type of schema in req.body
+  // get the user/instructor and send the type of schema in req.body
   user = await User.findById(id);
   // console.log(user);
 
@@ -21,11 +21,11 @@ const getUser = async (id, req) => {
     req.user = user;
     return user;
   }
-  user = await Doctor.findById(id);
+  user = await Instructor.findById(id);
   // console.log(user);
   if (user) {
-    req.userModel = "Doctor";
-    req.doctor = user;
+    req.userModel = "Instructor";
+    req.instructor = user;
     return user;
   }
 
@@ -121,24 +121,24 @@ exports.protect = catchAsync(async (req, res, next) => {
   // Verify token
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  // Check if user or doctor still exists
+  // Check if user or instructor still exists
   // No Need To Check
   const currentUser = await getUser(decoded.id, req);
   // console.log(currentUser);
   if (!currentUser) {
     return next(
       new AppError(
-        "The user/doctor belonging to this token does no longer exist.",
+        "The user/instructor belonging to this token does no longer exist.",
         401
       )
     );
   }
 
-  // Check if user/doctor changed password after the token was issued
+  // Check if user/instructor changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
       new AppError(
-        "User/Doctor recently changed password! Please log in again.",
+        "User/Instructor recently changed password! Please log in again.",
         401
       )
     );
@@ -154,6 +154,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo = (Model) =>
   catchAsync(async (req, res, next) => {
+    console.log(Model, req.userModel);
     if (Model === req.userModel) {
       return next(new AppError("You do not have access to this route"));
     }
@@ -267,10 +268,10 @@ exports.updatePassword = (Model) =>
 exports.restrictToSuperAdmin = (req, res, next) => {
   // Check if the logged-in admin has the role of super-admin
   // console.log(req.user);
-  // console.log(req.doctor);
+  // console.log(req.instructor);
   // console.log(req.admin);
 
-  if (req.doctor || req.user || req.admin.role !== "super-admin") {
+  if (req.instructor || req.user || req.admin.role !== "super-admin") {
     return next(
       new AppError("You do not have permission to perform this action", 403)
     );

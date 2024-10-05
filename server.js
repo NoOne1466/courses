@@ -13,7 +13,7 @@ process.on("uncaughtException", (err) => {
 });
 
 const app = require(`./app.js`);
-const Chat = require("./models/chatModel.js");
+// const Chat = require("./models/chatModel.js");
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
@@ -38,31 +38,31 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
-});
+// const io = require("socket.io")(server, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
 
-io.on("connection", (socket) => {
-  console.log("New client connected", socket.id);
+// io.on("connection", (socket) => {
+//   console.log("New client connected", socket.id);
 
-  socket.on("joinRoom", ({ chatId }) => {
-    socket.join(chatId);
-    console.log(`Client joined room: ${chatId}`);
-  });
+//   socket.on("joinRoom", ({ chatId }) => {
+//     socket.join(chatId);
+//     console.log(`Client joined room: ${chatId}`);
+//   });
 
-  socket.on("chatMessage", async ({ chatId, sender, message }) => {
-    const chat = await Chat.findById(chatId);
-    console.log(chat);
-    if (chat) {
-      chat.messages.push({ sender, message });
-      await chat.save();
-      io.to(chatId).emit("message", { sender, message });
-    }
-  });
+//   socket.on("chatMessage", async ({ chatId, sender, message }) => {
+//     const chat = await Chat.findById(chatId);
+//     console.log(chat);
+//     if (chat) {
+//       chat.messages.push({ sender, message });
+//       await chat.save();
+//       io.to(chatId).emit("message", { sender, message });
+//     }
+//   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected", socket.id);
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected", socket.id);
+//   });
+// });

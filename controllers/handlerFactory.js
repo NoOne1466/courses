@@ -1,9 +1,9 @@
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const APIFeatures = require("./../utils/apiFeatures");
-const Hospital = require("../models/hospitalModel");
-const Doctor = require("../models/doctorModel");
-const Order = require("./../models/orderModel");
+// const Hospital = require("../models/hospitalModel");
+// const Doctor = require("../models/doctorModel");
+// const Order = require("./../models/orderModel");
 // const User = require("../models/userModel");
 const multer = require("multer");
 
@@ -102,22 +102,22 @@ exports.getOne = (Model, popOptions) =>
     let doc = await query;
 
     console.log(Model.modelName);
-    let newSplit = [];
-    if (Model.modelName == "Doctor") {
-      console.log(doc.splitAvailableSlots);
-      for (const slot of doc.splitAvailableSlots) {
-        const temp = await Order.findOne({
-          isPaid: true,
-          startTime: slot.slotTime,
-          endTime: slot.endTime,
-        });
-        console.log("slot", temp);
-        if (!temp) {
-          console.log("no temp pushing");
-          newSplit.push(slot);
-        }
-      }
-    }
+    // let newSplit = [];
+    // if (Model.modelName == "Instructor") {
+    //   console.log(doc.splitAvailableSlots);
+    //   for (const slot of doc.splitAvailableSlots) {
+    //     const temp = await Order.findOne({
+    //       isPaid: true,
+    //       startTime: slot.slotTime,
+    //       endTime: slot.endTime,
+    //     });
+    //     console.log("slot", temp);
+    //     if (!temp) {
+    //       console.log("no temp pushing");
+    //       newSplit.push(slot);
+    //     }
+    //   }
+    // }
     // console.log("available ", newSplit);
     if (!doc) {
       return next(new AppError("No document found with that ID", 404));
@@ -135,13 +135,11 @@ exports.getOne = (Model, popOptions) =>
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     // To allow for nested GET reviews on doc or user (hack)
+    console.log("hi");
 
     let filter = {};
     // if (req.params.doctorId) filter = { doctor: req.params.doctorId };
     // if (req.params.userId) filter = { user: req.params.userId };
-    if (req.body.hospital) {
-      filter.hospital = req.body.hospital;
-    }
     const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
@@ -168,9 +166,9 @@ exports.getMe = (req, res, next) => {
     // userModel;
     next();
   }
-  if (req.userModel === "Doctor") {
+  if (req.userModel === "Instructor") {
     console.log(req.userModel);
-    req.params.id = req.doctor.id;
+    req.params.id = req.instructor.id;
     next();
   }
 };
@@ -207,26 +205,6 @@ exports.updateMe = (Model) =>
       "hospitals"
     );
     if (req.file) filteredBody.photo = `img/${req.file.filename}`;
-
-    // Validate and update hospitals
-    if (req.body.hospitals && Model.modelName == "Doctor") {
-      console.log(req.body.hospitals);
-      const hospitals = req.body.hospitals;
-      const hospitalRecords = await Hospital.find({
-        _id: { $in: hospitals },
-      });
-
-      if (hospitalRecords.length !== hospitals.length) {
-        return next(
-          new AppError(
-            "One or more hospitals provided do not exist in the database",
-            400
-          )
-        );
-      }
-
-      filteredBody.hospitals = hospitals;
-    }
 
     // 3) Update user document
     // console.log(req.model);

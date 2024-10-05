@@ -3,9 +3,7 @@ const User = require("../models/userModel");
 
 const userController = require("../controllers/userController");
 const authController = require("./../controllers/authController");
-const reviewUsersRouter = require("./../routes/reviewUsersRoutes");
 const factory = require("./../controllers/handlerFactory");
-const favoriteController = require("../controllers/favoriteController");
 // const reviewDoctor = require("../models/reviewDoctorsModel");
 
 const router = express.Router();
@@ -21,7 +19,7 @@ router.patch("/resetPassword", authController.resetPassword(User));
 router.use(authController.protect);
 router.get(
   "/me",
-  authController.restrictTo("Doctor"),
+  authController.restrictTo("Instructor"),
   userController.getMe,
   userController.getUser
 );
@@ -55,26 +53,5 @@ router
   );
 
 // Favorites routes
-router
-  .route("/favorites/Doctors")
-  .get(favoriteController.getAllFavoritesDoctors);
-router
-  .route("/favorites/add-doctor-to-favorites")
-  .post(favoriteController.addToFavorites);
-router
-  .route("/favorites/remove-doctor-from-favorites")
-  .delete(favoriteController.removeFromFavorites);
-
-router
-  .route("/favorites/hospitals")
-  .get(favoriteController.getAllFavoritesHospitals);
-
-router
-  .route("/favorites/add-hospital-to-favorites")
-  .post(favoriteController.addToFavorites);
-
-router
-  .route("/favorites/remove-hospital-from-favorites")
-  .delete(favoriteController.removeFromFavorites);
 
 module.exports = router;
