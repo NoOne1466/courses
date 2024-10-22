@@ -154,7 +154,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo = (Model) =>
   catchAsync(async (req, res, next) => {
-    console.log(Model, req.userModel);
+    console.log("authController", Model, req.userModel);
     if (Model === req.userModel) {
       return next(new AppError("You do not have access to this route"));
     }

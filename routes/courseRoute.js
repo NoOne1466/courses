@@ -1,4 +1,5 @@
 const express = require("express");
+
 const courseController = require("../controllers/courseController");
 const authController = require("../controllers/authController");
 
@@ -6,43 +7,52 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(courseController.getAllCourses) // Get all courses
+  .get(courseController.getAllCourses)
   .post(
-    authController.protect, // Protect route
-    authController.restrictTo("User"), // Only instructors and admins can create courses
-    courseController.createCourse // Create a new course
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.createCourse
   );
 
 router
   .route("/:id")
-  .get(courseController.getCourse) // Get a specific course
+  .get(courseController.getCourse)
   .patch(
     authController.protect,
     authController.restrictTo("User"),
-    courseController.updateCourse // Update course details
+    courseController.updateCourse
   )
   .delete(
     authController.protect,
     authController.restrictTo("User"),
-    courseController.deleteCourse // Only admins can delete courses
+    courseController.deleteCourse
   );
 
-// Route to upload the intro video for a specific course
-router.patch(
-  "/:id/uploadIntroVideo",
-  authController.protect,
-  authController.restrictTo("User"), // Only instructors can upload the intro video
-  courseController.uploadIntroVideo, // Middleware to handle video upload
-  courseController.updateCourseWithIntroVideo // Update course with intro video
-);
+router
+  .route("/:id/intro-video")
+  .patch(
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.uploadIntroVideoFile,
+    courseController.uploadIntroVideo
+  );
 
-// Route to upload additional videos for a specific course
-router.patch(
-  "/:id/uploadAdditionalVideos",
-  authController.protect,
-  authController.restrictTo("User"), // Only instructors can upload additional videos
-  courseController.uploadAdditionalVideos, // Middleware to handle additional video uploads
-  courseController.addAdditionalVideos // Add uploaded videos to the course
-);
+// Chapter Routes
+router
+  .route("/:courseId/chapters")
+  .post(
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.addChapter
+  );
+
+router
+  .route("/:courseId/chapters/:chapterId/videos")
+  .post(
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.uploadSingleVideo,
+    courseController.addVideoToChapter
+  );
 
 module.exports = router;
