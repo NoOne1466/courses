@@ -45,14 +45,29 @@ router
     authController.restrictTo("User"),
     courseController.addChapter
   );
+router
+  .route("/:courseId/chapters/:chapterId")
+  .delete(
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.deleteChapter
+  );
 
 router
-  .route("/:courseId/chapters/:chapterId/videos")
+  .route("/:courseId/chapters/:chapterId/video")
   .post(
     authController.protect,
     authController.restrictTo("User"),
     courseController.uploadSingleVideo,
     courseController.addVideoToChapter
+  );
+
+router
+  .route("/:courseId/chapters/:chapterId/video/:videoId")
+  .delete(
+    authController.protect,
+    authController.restrictTo("User"),
+    courseController.deleteVideo
   );
 
 module.exports = router;
