@@ -95,13 +95,14 @@ exports.createOne = (Model) =>
 
 exports.getOne = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
+    console.log("xx");
     let query = Model.findById(req.params.id);
 
     if (popOptions) query = query.populate(popOptions);
 
     let doc = await query;
 
-    console.log(Model.modelName);
+    console.log("model name", Model.modelName);
     // let newSplit = [];
     // if (Model.modelName == "Instructor") {
     //   console.log(doc.splitAvailableSlots);
@@ -125,10 +126,7 @@ exports.getOne = (Model, popOptions) =>
 
     res.status(200).json({
       status: "success",
-      data: {
-        data: doc,
-        onlyFreeSlots: newSplit,
-      },
+      doc,
     });
   });
 
@@ -164,11 +162,13 @@ exports.getMe = (req, res, next) => {
     console.log(req.userModel);
     req.params.id = req.user.id;
     // userModel;
+    console.log("model", req.model);
     next();
   }
   if (req.userModel === "Instructor") {
     console.log(req.userModel);
     req.params.id = req.instructor.id;
+    console.log("model", req.model);
     next();
   }
 };

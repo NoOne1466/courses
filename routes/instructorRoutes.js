@@ -19,7 +19,7 @@ router.patch("/resetPassword", authController.resetPassword(Instructor));
 router.use(authController.protect);
 router.get(
   "/me",
-  authController.restrictTo("Instructor"),
+  authController.restrictTo("User"),
   instructorController.getMe,
   instructorController.getInstructor
 );
