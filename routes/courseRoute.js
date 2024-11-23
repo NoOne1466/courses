@@ -70,4 +70,8 @@ router
     courseController.deleteVideo
   );
 
+router
+  .route("/:courseId/chapters/:chapterId/quiz/:quizId/submit")
+  .post(authController.protect, courseController.submitQuiz);
+
 module.exports = router;

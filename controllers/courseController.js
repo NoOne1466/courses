@@ -219,3 +219,59 @@ exports.deleteVideo = catchAsync(async (req, res, next) => {
     message: "video successfully deleted",
   });
 });
+
+exports.submitQuiz = catchAsync(async (req, res, next) => {
+  const { courseId, chapterId, quizId } = req.params;
+  const { answers } = req.body;
+
+  const course = await Course.findOne({
+    _id: courseId,
+    "chapters._id": chapterId,
+    "chapters.quiz._id": quizId,
+  });
+
+  if (!course) {
+    return next(new AppError("Course, Chapter, or Quiz not found", 404));
+  }
+
+  const chapter = course.chapters.find(
+    (chap) => chap._id.toString() === chapterId
+  );
+
+  const quiz = chapter.quiz.find((qz) => qz._id.toString() === quizId);
+
+  if (!quiz) {
+    return next(new AppError("Quiz not found", 404));
+  }
+
+  let score = 0;
+  const results = quiz.questions.map((question) => {
+    const userAnswer = answers.find(
+      (ans) => ans.questionId === question._id.toString()
+    );
+    const isCorrect = userAnswer?.answer === question.rightAnswer;
+    if (isCorrect) score += 1;
+
+    return {
+      questionId: question._id,
+      isCorrect,
+      correctAnswer: question.rightAnswer,
+      userAnswer: userAnswer?.answer || null,
+    };
+  });
+
+  const grade = (score / quiz.questions.length) * 100;
+
+  quiz.grade = grade;
+  await course.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      results,
+      score,
+      totalQuestions,
+      grade,
+    },
+  });
+});
