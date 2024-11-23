@@ -39,7 +39,6 @@ const quizSchema = new mongoose.Schema({
     require: [true, "a quiz must have a title"],
   },
   questions: [questionsSchema],
-  grade: Number,
 });
 
 // Define the chapter subdocument schema
