@@ -1,4 +1,5 @@
 const Course = require("../models/coursesModel");
+const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const factory = require("./handlerFactory");
 const AppError = require("../utils/appError");
@@ -261,6 +262,8 @@ exports.submitQuiz = catchAsync(async (req, res, next) => {
   });
 
   const grade = (score / quiz.questions.length) * 100;
+  const user = await User.findById(req.user.id);
+  user.grades.push(courseId, grade);
 
   res.status(200).json({
     status: "success",

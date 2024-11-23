@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female"],
       default: null,
     },
+    grades: [
+      { type: mongoose.Schema.Types.ObjectId, ref: Courses },
+      { type: String },
+    ],
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetOtp: String,
