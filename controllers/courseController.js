@@ -221,57 +221,124 @@ exports.deleteVideo = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.addQuizToChapter = async (req, res) => {
+  const { courseId, chapterId } = req.params;
+  const { title, questions } = req.body;
+
+  try {
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return next(new AppError("Course not found", 404));
+    }
+
+    // Find the chapter in the course
+    const chapter = course.chapters.id(chapterId); // Mongoose's .id() method for subdocuments
+    if (!chapter) {
+      return next(new AppError("Chapter not found", 404));
+    }
+
+    // console.log(req.userModel, req.user);
+    // console.log(course.instructors.includes(req.user.id));
+
+    const isAdmin = req.userModel === "Admin";
+    const isInstructor = course.instructors.includes(req.user.id);
+
+    if (!isAdmin && !isInstructor) {
+      return next(
+        new AppError("You are not authorized to add a quiz to this course", 404)
+      );
+    }
+    // Create a new quiz object
+    const newQuiz = {
+      title,
+      questions,
+    };
+
+    // Push the new quiz into the chapter's quiz array
+    chapter.quiz.push(newQuiz);
+
+    // Save the updated course
+    await course.save();
+
+    res.status(201).json({
+      message: "Quiz added successfully",
+      quiz: newQuiz,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to add quiz",
+      error: error.message,
+    });
+  }
+};
+
 exports.submitQuiz = catchAsync(async (req, res, next) => {
   const { courseId, chapterId, quizId } = req.params;
   const { answers } = req.body;
+  if (req.userModel === "User") {
+    const course = await Course.findOne({
+      _id: courseId,
+      "chapters._id": chapterId,
+      "chapters.quiz._id": quizId,
+    });
 
-  const course = await Course.findOne({
-    _id: courseId,
-    "chapters._id": chapterId,
-    "chapters.quiz._id": quizId,
-  });
+    if (!course) {
+      return next(new AppError("Course, Chapter, or Quiz not found", 404));
+    }
 
-  if (!course) {
-    return next(new AppError("Course, Chapter, or Quiz not found", 404));
-  }
-
-  const chapter = course.chapters.find(
-    (chap) => chap._id.toString() === chapterId
-  );
-
-  const quiz = chapter.quiz.find((qz) => qz._id.toString() === quizId);
-
-  if (!quiz) {
-    return next(new AppError("Quiz not found", 404));
-  }
-
-  let score = 0;
-  const results = quiz.questions.map((question) => {
-    const userAnswer = answers.find(
-      (ans) => ans.questionId === question._id.toString()
+    const chapter = course.chapters.find(
+      (chap) => chap._id.toString() === chapterId
     );
-    const isCorrect = userAnswer?.answer === question.rightAnswer;
-    if (isCorrect) score += 1;
 
-    return {
-      questionId: question._id,
-      isCorrect,
-      correctAnswer: question.rightAnswer,
-      userAnswer: userAnswer?.answer || null,
-    };
-  });
+    if (!chapter) {
+      return next(new AppError("Chapter not found", 404));
+    }
 
-  const grade = (score / quiz.questions.length) * 100;
-  const user = await User.findById(req.user.id);
-  user.grades.push(courseId, grade);
+    const quiz = chapter.quiz.find((qz) => qz._id.toString() === quizId);
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      results,
-      score,
-      totalQuestions,
+    if (!quiz) {
+      return next(new AppError("Quiz not found", 404));
+    }
+    let score = 0;
+    const results = quiz.questions.map((question) => {
+      const userAnswer = answers.find(
+        (ans) => ans.questionId === question._id.toString()
+      );
+      const isCorrect = userAnswer?.answer === question.rightAnswer;
+      if (isCorrect) score += 1;
+
+      return {
+        questionId: question._id,
+        isCorrect,
+        correctAnswer: question.rightAnswer,
+        userAnswer: userAnswer?.answer || null,
+      };
+    });
+
+    const grade = (score / quiz.questions.length) * 100;
+    const user = await User.findById(req.user.id);
+    console.log(courseId, chapter.id, quiz.id);
+    user.grades.push({
+      course: courseId,
+      chapter: chapter.id,
+      quiz: quiz.id,
       grade,
-    },
-  });
+    });
+
+    // console.log(user);
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        results,
+        score,
+        grade,
+      },
+    });
+  } else {
+    return next(new AppError("You dont have permission for this route", 403));
+  }
 });

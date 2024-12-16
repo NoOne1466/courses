@@ -69,8 +69,12 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     grades: [
-      { type: mongoose.Schema.Types.ObjectId, ref: Courses },
-      { type: String },
+      {
+        course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+        chapter: { type: mongoose.Schema.Types.ObjectId, ref: "chapterSchema" },
+        quiz: { type: mongoose.Schema.Types.ObjectId, ref: "quizSchema" },
+        grade: { type: String },
+      },
     ],
     passwordChangedAt: Date,
     passwordResetToken: String,

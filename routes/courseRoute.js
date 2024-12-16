@@ -71,6 +71,10 @@ router
   );
 
 router
+  .route("/:courseId/chapters/:chapterId/quiz")
+  .post(authController.protect, courseController.addQuizToChapter);
+
+router
   .route("/:courseId/chapters/:chapterId/quiz/:quizId/submit")
   .post(authController.protect, courseController.submitQuiz);
 
