@@ -15,6 +15,8 @@ const userRouter = require("./routes/userRoutes");
 const instructorRouter = require("./routes/instructorRoutes");
 const adminRouter = require("./routes/adminRoutes");
 const courseRouter = require("./routes/courseRoute");
+const chatRouter = require("./routes/chatRoutes");
+
 // const favoriteRouter = require("./routes/favoriteRoutes.js");
 // const viewRouter = require("./routes/viewRoutes");
 
@@ -112,6 +114,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins", adminRouter);
 app.use("/api/v1/instructors", instructorRouter);
 app.use("/api/v1/course", courseRouter);
+app.use("/api/v1/chats", chatRouter);
 
 // app.use("/api/v1", webhookRouter);
 

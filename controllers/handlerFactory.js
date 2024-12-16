@@ -96,7 +96,6 @@ exports.createOne = (Model) =>
 
 exports.getOne = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
-    console.log("xx");
     let query = Model.findById(req.params.id);
 
     if (popOptions) query = query.populate(popOptions);
@@ -158,18 +157,18 @@ exports.getAll = (Model) =>
   });
 
 exports.getMe = (req, res, next) => {
-  console.log(req.userModel);
   if (req.userModel === "User") {
     console.log(req.userModel);
     req.params.id = req.user.id;
-    // userModel;
     console.log("model", req.model);
+    console.log(req.params.id);
     next();
   }
   if (req.userModel === "Instructor") {
     console.log(req.userModel);
-    req.params.id = req.instructor.id;
+    req.params.id = req.user.id;
     console.log("model", req.model);
+    console.log(req.params.id);
     next();
   }
 };

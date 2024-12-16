@@ -13,7 +13,11 @@ process.on("uncaughtException", (err) => {
 });
 
 const app = require(`./app.js`);
-// const Chat = require("./models/chatModel.js");
+const Chat = require("./models/chatModel.js");
+const User = require("./models/userModel.js");
+const Instructor = require("./models/instructorModel.js");
+const chatController = require("./controllers/chatController.js");
+
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
@@ -38,31 +42,61 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-// const io = require("socket.io")(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
-// io.on("connection", (socket) => {
-//   console.log("New client connected", socket.id);
+io.on("connection", (socket) => {
+  console.log("New client connected", socket.id);
 
-//   socket.on("joinRoom", ({ chatId }) => {
-//     socket.join(chatId);
-//     console.log(`Client joined room: ${chatId}`);
-//   });
+  // Handle joining a chat room
+  socket.on("joinRoom", ({ chatId }) => {
+    socket.join(chatId);
+    console.log(`Client joined room: ${chatId}`);
+  });
 
-//   socket.on("chatMessage", async ({ chatId, sender, message }) => {
-//     const chat = await Chat.findById(chatId);
-//     console.log(chat);
-//     if (chat) {
-//       chat.messages.push({ sender, message });
-//       await chat.save();
-//       io.to(chatId).emit("message", { sender, message });
-//     }
-//   });
+  // Handle sending messages
+  socket.on(
+    "chatMessage",
+    async ({ chatId, senderId, senderType, message }) => {
+      try {
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+          console.error(`Chat with ID ${chatId} not found`);
+          return;
+        }
 
-//   socket.on("disconnect", () => {
-//     console.log("Client disconnected", socket.id);
-//   });
-// });
+        // Push the new message to the chat's message array
+        chat.messages.push({
+          senderId,
+          senderType,
+          message,
+          timestamp: new Date(),
+        });
+        await chat.save();
+
+        // Emit the new message to the room
+        io.to(chatId).emit("message", {
+          senderId,
+          senderType,
+          message,
+          timestamp: new Date(),
+        });
+      } catch (error) {
+        console.error("Error handling chatMessage:", error);
+      }
+    }
+  );
+
+  // Handle typing notifications
+  socket.on("typing", ({ chatId, senderType, isTyping }) => {
+    io.to(chatId).emit("typing", { senderType, isTyping });
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("Client disconnected", socket.id);
+  });
+});

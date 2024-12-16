@@ -3,12 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat with Doctor</title>
+    <title>Chat Application</title>
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+      #chat {
+        max-width: 500px;
+        margin: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      #messages {
+        height: 300px;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      #typing {
+        font-style: italic;
+        color: grey;
+      }
+    </style>
   </head>
   <body>
     <div id="chat">
       <div id="messages"></div>
+      <div id="typing"></div>
       <form id="messageForm">
         <input type="text" id="messageInput" placeholder="Enter message" />
         <button type="submit">Send</button>
@@ -18,41 +38,62 @@
     <script>
       const socket = io();
 
-      // async function getChat(userId, doctorId) {
-      //   const response = await fetch(`/api/v1/chats/chat`, {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({ userId, doctorId }),
-      //   });
-      //   const data = await response.json();
-      //   if (data.status === "success") {
-      //     return data.data.chat;
-      //   } else {
-      //     throw new Error("Chat not found");
-      //   }
-      // }
+      // Replace with the actual chat ID, user ID, and sender type (User/Instructor)
+      const chatId = "6760979b7f185cc34201686e";
+      const senderId = "676039638c8e1be4d81eeb8a"; // User or Instructor ID
+      const senderType = "User"; // Or "Instructor"
 
-      const chatId = "666b12b710ad9cca8a673c15"; // Replace with actual chat ID
+      // Join the chat room
       socket.emit("joinRoom", { chatId });
 
+      // DOM elements
       const messageForm = document.getElementById("messageForm");
       const messageInput = document.getElementById("messageInput");
       const messages = document.getElementById("messages");
+      const typing = document.getElementById("typing");
 
+      // Handle sending messages
       messageForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const message = messageInput.value;
-        console.log(messageInput);
-        socket.emit("chatMessage", { chatId, sender: "user", message });
+        const message = messageInput.value.trim();
+        if (message === "") return;
+
+        socket.emit("chatMessage", {
+          chatId,
+          senderId,
+          senderType,
+          message,
+        });
+
+        // Add message to the local chat view
+        const div = document.createElement("div");
+        div.textContent = `You: ${message}`;
+        messages.appendChild(div);
+
         messageInput.value = "";
+        typing.textContent = ""; // Clear typing notification
       });
 
-      socket.on("message", (message) => {
+      // Listen for incoming messages
+      socket.on("message", (data) => {
         const div = document.createElement("div");
-        div.textContent = `${message.sender}: ${message.message}`;
+        div.textContent = `${data.senderType}: ${data.message}`;
         messages.appendChild(div);
+      });
+
+      // Handle typing notifications
+      messageInput.addEventListener("input", () => {
+        socket.emit("typing", {
+          chatId,
+          senderType,
+          isTyping: messageInput.value.length > 0,
+        });
+      });
+
+      socket.on("typing", (data) => {
+        typing.textContent = data.isTyping
+          ? `${data.senderType} is typing...`
+          : "";
       });
     </script>
   </body>
