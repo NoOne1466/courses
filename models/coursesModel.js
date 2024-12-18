@@ -74,6 +74,14 @@ const courseSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  topic: {
+    type: String,
+    required: true,
+  },
+  keyPoints: {
+    type: [String],
+    required: true,
+  },
   price: {
     type: Number,
     required: [true, "A tour must have a price"],
