@@ -4,17 +4,18 @@ const AppError = require("../utils/appError");
 exports.getChat = async (req, res, next) => {
   if (req.userModel === "User") {
     userId = req.user.id;
-    instructorId = req.body.doctorId;
+    instructorId = req.body.instructorId;
   } else if (req.userModel === "Instructor") {
-    instructorId = req.instructor.id;
+    instructorId = req.user.id;
     userId = req.body.userId;
   } else {
     return next(new AppError("Provide a user id and doctor id", 400));
   }
 
+  console.log(req.userModel);
   const chat = await Chat.findOne({
     user: userId,
-    doctor: doctorId,
+    instructor: instructorId,
   });
 
   if (!chat) {

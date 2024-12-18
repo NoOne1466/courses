@@ -23,8 +23,10 @@ router.get(
   userController.getMe,
   userController.getUser
 );
+
 router.patch("/updateMyPassword", authController.updatePassword(User));
-router.patch("/udpateMe", factory.uploadPhoto, userController.updateMe);
+// router.patch("/udpateMe", factory.uploadPhoto, userController.updateMe);
+router.route("/updateMe").patch(factory.uploadPhoto, userController.updateMe);
 router.delete("/deleteMe", userController.deleteMe);
 
 router
