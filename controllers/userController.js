@@ -14,3 +14,5 @@ exports.updateMe = factory.updateMe(User);
 exports.deleteMe = factory.deleteMe(User);
 exports.getMe = factory.getMe;
 exports.homePage = factory.homePage;
+
+exports.checkIf;

@@ -36,8 +36,43 @@ exports.uploadSingleVideo = upload.single("videoPath"); // For uploading single 
 // Middleware for uploading additional videos
 // exports.uploadAdditionalVideos = upload.array("videoPath", 10); // Allow multiple additional videos
 
-exports.getAllCourses = factory.getAll(Course);
-exports.getCourse = factory.getOne(Course);
+exports.getAllCourses = catchAsync(async (req, res, next) => {
+  const courses = await Course.find().select("-chapters.videos -chapters.quiz");
+
+  res.status(200).json({
+    status: "success",
+    data: courses,
+  });
+});
+
+exports.getCourse = catchAsync(async (req, res, next) => {
+  const { courseId } = req.params;
+  console.log(courseId);
+
+  const user = await User.findById(req.user.id).select("purchasedCourses");
+
+  console.log(user);
+  const hasAccess = user.purchasedCourses.some((course) =>
+    course.equals(courseId)
+  );
+
+  let course = await Course.findById(courseId);
+
+  if (!hasAccess) {
+    // Exclude sensitive content for unpaid users
+    course = course.toObject();
+    course.chapters.forEach((chapter) => {
+      delete chapter.videos;
+      delete chapter.quiz;
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: course,
+  });
+});
+
 exports.createCourse = factory.createOne(Course);
 exports.updateCourse = factory.updateOne(Course);
 exports.deleteCourse = factory.deleteOne(Course);

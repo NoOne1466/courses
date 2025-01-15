@@ -11,7 +11,6 @@ const sendEmail = require("./../utils/email");
 // const { appendFile } = require("fs");
 
 const getUser = async (id, req) => {
-  let user;
   try {
     // Execute all queries in parallel
     const [user, instructor, admin] = await Promise.all([
@@ -45,7 +44,6 @@ const getUser = async (id, req) => {
     console.error("Error fetching user:", error.message);
     throw new Error("Unable to fetch user");
   }
-  us;
 };
 
 const signToken = (id) => {

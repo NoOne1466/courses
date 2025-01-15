@@ -68,6 +68,8 @@ const userSchema = new mongoose.Schema(
       enum: ["male", "female"],
       default: null,
     },
+    purchasedCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+
     grades: [
       {
         course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },

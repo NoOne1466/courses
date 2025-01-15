@@ -15,8 +15,8 @@ router
   );
 
 router
-  .route("/:id")
-  .get(courseController.getCourse)
+  .route("/:courseId")
+  .get(authController.protect, courseController.getCourse)
   .patch(
     authController.protect,
     authController.restrictTo("User"),

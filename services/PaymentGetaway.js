@@ -32,31 +32,39 @@ class PaymentGateway {
   };
 
   createOrder = async ({ id, priceInCents, name, description }) => {
-    // console.log(priceInCents, name, description);
-    if (!this.token)
-      throw new Error("Token is not set please call getToken first");
-    if (!priceInCents || !name || !description)
-      throw new Error("priceInCents, name, description are required");
+    try {
+      // console.log(priceInCents, name, description);
+      if (!this.token)
+        throw new Error("Token is not set please call getToken first");
+      if (!priceInCents || !name || !description)
+        throw new Error("priceInCents, name, description are required");
 
-    const body = {
-      auth_token: this.token,
-      delivery_needed: "false",
-      amount_cents: priceInCents,
-      currency: "EGP",
-      merchant_order_id: id,
-      items: [
-        {
-          name: name,
-          amount_cents: priceInCents,
-          description: description,
-          quantity: 1,
-        },
-      ],
-    };
-    // console.log("data", body);
-    this.lastOrder = (await this.axios.post("/ecommerce/orders", body)).data;
-    // console.log("last order", this.lastOrder);
-    return this.lastOrder;
+      const body = {
+        auth_token: this.token,
+        delivery_needed: "false",
+        amount_cents: priceInCents,
+        currency: "EGP",
+        merchant_order_id: id,
+        items: [
+          {
+            name: name,
+            amount_cents: priceInCents,
+            description: description,
+            quantity: 1,
+          },
+        ],
+      };
+
+      // console.log("data", body);
+      this.lastOrder = (await this.axios.post("/ecommerce/orders", body)).data;
+      // console.log("last order", this.lastOrder);
+      return this.lastOrder;
+    } catch (error) {
+      console.error(
+        "Error creating order:",
+        error.response?.data || error.message
+      );
+    }
   };
 
   createPaymentGateway = async ({
@@ -66,21 +74,23 @@ class PaymentGateway {
     uPhoneNumber,
     orderId,
     priceInCents,
+    order_id,
   }) => {
-    // console.log(
-    //   "email",
-    //   uEmail,
-    //   "first",
-    //   uFirstName,
-    //   "last",
-    //   uLastName,
-    //   "phone",
-    //   uPhoneNumber,
-    //   "id",
-    //   orderId,
-    //   "price",
-    //   priceInCents
-    // );
+    console.log(
+      "payment creation",
+      "email",
+      uEmail,
+      "first",
+      uFirstName,
+      "last",
+      uLastName,
+      "phone",
+      uPhoneNumber,
+      "id",
+      orderId,
+      "price",
+      priceInCents
+    );
     if (!this.lastOrder || !this.token)
       throw new Error("Order is not set please call createOrder first");
     if (!uEmail || !uFirstName || !uLastName || !uPhoneNumber)
@@ -112,12 +122,27 @@ class PaymentGateway {
         state: "NA",
       },
     };
-    // console.log(body);
-    const paymentToken = (
-      await this.axios.post("/acceptance/payment_keys", body)
-    ).data.token;
+    console.log("body", body);
+    // const paymentToken = await this.axios.post(
+    //   "/acceptance/payment_keys",
+    //   body
+    // ); // the error is in this line
+    // // .data.token;
+
     // console.log("payment token", paymentToken);
-    return paymentToken;
+    // return paymentToken;
+
+    try {
+      const response = await this.axios.post("/acceptance/payment_keys", body);
+      console.log("Payment token created successfully:", response.data.token);
+      return response.data.token;
+    } catch (error) {
+      console.error(
+        "Error creating payment gateway:",
+        error.response?.data || error.message
+      );
+      throw new Error("Payment creation failed. Please verify your request.");
+    }
   };
 
   createRufund = async (trxId, refundAmountInCents) => {
@@ -175,7 +200,7 @@ class PaymentGateway {
   };
 }
 const paymobAPI = axios.create({
-  baseURL: "https://accept.paymob.com/api/",
+  baseURL: "https://accept.paymob.com/api",
 });
 module.exports = {
   PaymentGateway,
