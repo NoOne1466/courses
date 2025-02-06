@@ -4,10 +4,10 @@ const AppError = require("../utils/appError");
 exports.getChat = async (req, res, next) => {
   if (req.userModel === "User") {
     userId = req.user.id;
-    instructorId = req.body.instructorId;
+    instructorId = req.params.id;
   } else if (req.userModel === "Instructor") {
     instructorId = req.user.id;
-    userId = req.body.userId;
+    userId = req.params.id;
   } else {
     return next(new AppError("Provide a user id and doctor id", 400));
   }

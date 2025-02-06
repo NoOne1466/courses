@@ -7,7 +7,9 @@ const router = express.Router();
 router.route("/").post(authController.protect, chatController.createChat);
 // .get(authController.protect, chatController.getAll);
 
-router.route("/getChat").get(authController.protect, chatController.getChat);
+router
+  .route("/getChat/:id")
+  .get(authController.protect, chatController.getChat);
 
 router
   .route("/getChatforcurrentperson")
